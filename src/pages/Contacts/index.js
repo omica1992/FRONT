@@ -8,6 +8,7 @@ import React, {
 // import { SocketContext } from "../../context/Socket/SocketContext";
 import { toast } from "react-toastify";
 import { useHistory } from "react-router-dom";
+import Checkbox from '@mui/material/Checkbox';
 
 import { makeStyles } from "@material-ui/core/styles";
 import Table from "@material-ui/core/Table";
@@ -132,6 +133,7 @@ const Contacts = () => {
 
     const [importContactModalOpen, setImportContactModalOpen] = useState(false);
     const [deletingContact, setDeletingContact] = useState(null);
+    const [deletingInBulkContact, setDeletingInBulkContact] = useState(null);
     const [ImportContacts, setImportContacts] = useState(null);
     const [blockingContact, setBlockingContact] = useState(null);
     const [unBlockingContact, setUnBlockingContact] = useState(null);
@@ -144,6 +146,7 @@ const Contacts = () => {
     const fileUploadRef = useRef(null);
     const [selectedTags, setSelectedTags] = useState([]);
     const { setCurrentTicket } = useContext(TicketsContext);
+    const [selectedContacts, setSelectedContacts] = useState('');
 
 
     const { getAll: getAllSettings } = useCompanySettings();
@@ -244,6 +247,15 @@ const Contacts = () => {
         }
     };
 
+    const handleToggleContact = (id) => {
+        setSelectedContacts((prev) =>
+          prev.includes(id)
+            ? prev.filter((item) => item !== id)
+            : [...prev, id]
+        );
+      };
+      
+
     const handleSelectedTags = (selecteds) => {
         const tags = selecteds.map((t) => t.id);
         setSelectedTags(tags);
@@ -315,6 +327,21 @@ const Contacts = () => {
             toastError(err);
             setImportContacts(false);
         }
+    };
+
+    const handleDeleteInBulck = async () => {
+        console.log('selectedContacts', selectedContacts);
+        try {
+            await api.delete("/contactsRemoveMany", { data: { listContactIds: selectedContacts }});
+            toast.success("Contatos deletados com sucesso");
+            window.location.reload();
+            // setSearchParam("");
+            // setPageNumber(1);
+            // setDeletingContact(null);
+        } catch (err) {
+            toastError(err);
+        }
+        setDeletingInBulkContact(null);
     };
 
     const handleimportChats = async () => {
@@ -455,6 +482,31 @@ const Contacts = () => {
                                     Importar / Exportar
                                     <ArrowDropDown />
                                 </Button>
+                                <Button
+                                    variant="contained"
+                                    style={{
+                                        backgroundColor: '#d32f2f', 
+                                        borderRadius: 2,
+                                        textTransform: 'none',
+                                        fontWeight: 600,
+                                        px: 2,
+                                        py: 1,
+                                        boxShadow: 3,
+                                        transition: '0.2s',
+                                        color: '#fff',
+                                        '&:hover': {
+                                        backgroundColor: '#b71c1c', 
+                                        boxShadow: 4,
+                                        },
+                                    }}
+                                    onClick={() => {
+                                        handleDeleteInBulck(selectedContacts)
+                                    }}
+                                    >
+                                    Excluir em massa
+                                </Button>
+
+
                                 <Menu {...bindMenu(popupState)}>
                                     <MenuItem
                                         onClick={() => {
@@ -633,6 +685,12 @@ const Contacts = () => {
                                             {contact.channel === "facebook" && (<Facebook style={{ color: "blue" }} />)}
                                         </IconButton>
 
+                                        <Checkbox
+                                            checked={selectedContacts.includes(contact.id)}
+                                            onChange={() => handleToggleContact(contact.id)}
+                                            size="small"
+                                            color="primary"
+                                        />
                                         <IconButton
                                             size="small"
                                             onClick={() =>
