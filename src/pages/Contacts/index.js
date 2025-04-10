@@ -22,6 +22,8 @@ import Button from "@material-ui/core/Button";
 import Avatar from "@material-ui/core/Avatar";
 import { Facebook, Instagram, WhatsApp } from "@material-ui/icons";
 import SearchIcon from "@material-ui/icons/Search";
+import DeleteIcon from '@mui/icons-material/Delete';
+import PersonAddAlt1Icon from '@mui/icons-material/PersonAddAlt1';
 
 import TextField from "@material-ui/core/TextField";
 import InputAdornment from "@material-ui/core/InputAdornment";
@@ -153,6 +155,42 @@ const Contacts = () => {
     const { getAll: getAllSettings } = useCompanySettings();
     const [hideNum, setHideNum] = useState(false);
     const [enableLGPD, setEnableLGPD] = useState(false);
+    // roundedOutlinedButton 
+    // const roundedOutlinedButton = {
+    //     backgroundColor: '#fff',
+    //     borderRadius: '12px',
+    //     textTransform: 'none',
+    //     fontWeight: 600,
+    //     paddingX: 2,
+    //     paddingY: 1,
+    //     boxShadow: 1,
+    //     color: '#333',
+    //     borderColor: '#ddd',
+    //     '&:hover': {
+    //       backgroundColor: '#f5f5f5',
+    //       boxShadow: 2,
+    //       borderColor: '#ccc',
+    //     },
+    //   };
+      const roundedOutlinedButton = {
+        backgroundColor: '#fff',
+        borderRadius: '12px',
+        textTransform: 'none',
+        fontWeight: 600,
+        paddingX: 2,
+        paddingY: 1,
+        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.08)',
+        color: '#333',
+        border: '1px solid #ddd',
+        transition: 'all 0.2s ease-in-out',
+        '&:hover': {
+          backgroundColor: '#fefefe',
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+          borderColor: '#ccc',
+        },
+      };
+      
+
     useEffect(() => {
 
         async function fetchData() {
@@ -464,48 +502,50 @@ const Contacts = () => {
                         type="search"
                         value={searchParam}
                         onChange={handleSearch}
+                        variant="outlined"
+                        size="small"
+                        sx={{
+                            backgroundColor: '#fff',
+                            borderRadius: '12px',
+                            boxShadow: 1,
+                            '& .MuiOutlinedInput-root': {
+                            borderRadius: '12px',
+                            paddingLeft: 1,
+                            },
+                            '& .MuiInputBase-input': {
+                            padding: '8px 10px',
+                            },
+                        }}
                         InputProps={{
                             startAdornment: (
-                                <InputAdornment position="start">
-                                    <SearchIcon color="secondary" />
-                                </InputAdornment>
+                            <InputAdornment position="start">
+                                <SearchIcon sx={{ color: '#999', fontSize: 20 }} />
+                            </InputAdornment>
                             ),
                         }}
                     />
+
                     <PopupState variant="popover" popupId="demo-popup-menu">
                         {(popupState) => (
                             <React.Fragment>
                                 <Button
-                                    variant="contained"
-                                    color="primary"
+                                    variant="outlined"
+                                    // color="primary"
+                                    sx={roundedOutlinedButton}
                                     {...bindTrigger(popupState)}
                                 >
                                     Importar / Exportar
                                     <ArrowDropDown />
                                 </Button>
                                 <Button
-                                    variant="contained"
-                                    style={{
-                                        backgroundColor: '#d32f2f', 
-                                        borderRadius: 2,
-                                        textTransform: 'none',
-                                        fontWeight: 600,
-                                        px: 2,
-                                        py: 1,
-                                        boxShadow: 3,
-                                        transition: '0.2s',
-                                        color: '#fff',
-                                        '&:hover': {
-                                        backgroundColor: '#b71c1c', 
-                                        boxShadow: 4,
-                                        },
-                                    }}
-                                    onClick={() => {
-                                        handleDeleteInBulck(selectedContacts)
-                                    }}
+                                    variant="outlined"
+                                    startIcon={<DeleteIcon />}
+                                    onClick={() => handleDeleteInBulck(selectedContacts)}
+                                    sx={roundedOutlinedButton}
                                     >
                                     Excluir em massa
-                                </Button>
+                                    </Button>
+
 
 
                                 <Menu {...bindMenu(popupState)}>
@@ -573,9 +613,11 @@ const Contacts = () => {
                         )}
                     </PopupState>
                     <Button
-                        variant="contained"
-                        color="primary"
+                        variant="outlined"
+                        // color="primary"
+                        sx={roundedOutlinedButton}
                         onClick={handleOpenContactModal}
+                        startIcon={<PersonAddAlt1Icon />}
                     >
                         {i18n.t("contacts.buttons.add")}
                     </Button>
