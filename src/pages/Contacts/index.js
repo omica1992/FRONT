@@ -9,6 +9,7 @@ import React, {
 import { toast } from "react-toastify";
 import { useHistory } from "react-router-dom";
 import Checkbox from '@mui/material/Checkbox';
+import Box from '@mui/material/Box';
 
 import { makeStyles } from "@material-ui/core/styles";
 import Table from "@material-ui/core/Table";
@@ -685,12 +686,36 @@ const Contacts = () => {
                                             {contact.channel === "facebook" && (<Facebook style={{ color: "blue" }} />)}
                                         </IconButton>
 
-                                        <Checkbox
+                                            <Checkbox
                                             checked={selectedContacts.includes(contact.id)}
                                             onChange={() => handleToggleContact(contact.id)}
-                                            size="small"
-                                            color="primary"
-                                        />
+                                            icon={
+                                                <Box
+                                                sx={{
+                                                    width: 20,
+                                                    height: 20,
+                                                    borderRadius: '50%',
+                                                    border: '2px solid #ccc',
+                                                    backgroundColor: 'transparent',
+                                                }}
+                                                />
+                                            }
+                                            checkedIcon={
+                                                <Box
+                                                sx={{
+                                                    width: 20,
+                                                    height: 20,
+                                                    borderRadius: '50%',
+                                                    backgroundColor: '#1976d2',
+                                                    border: '2px solid #1976d2',
+                                                }}
+                                                />
+                                            }
+                                            sx={{
+                                                padding: 0,
+                                            }}
+                                            />
+
                                         <IconButton
                                             size="small"
                                             onClick={() =>
