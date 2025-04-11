@@ -8,6 +8,8 @@ import React, {
 // import { SocketContext } from "../../context/Socket/SocketContext";
 import { toast } from "react-toastify";
 import { useHistory } from "react-router-dom";
+import Checkbox from '@mui/material/Checkbox';
+import Box from '@mui/material/Box';
 
 import { makeStyles } from "@material-ui/core/styles";
 import Table from "@material-ui/core/Table";
@@ -20,6 +22,8 @@ import Button from "@material-ui/core/Button";
 import Avatar from "@material-ui/core/Avatar";
 import { Facebook, Instagram, WhatsApp } from "@material-ui/icons";
 import SearchIcon from "@material-ui/icons/Search";
+import DeleteIcon from '@mui/icons-material/Delete';
+import PersonAddAlt1Icon from '@mui/icons-material/PersonAddAlt1';
 
 import TextField from "@material-ui/core/TextField";
 import InputAdornment from "@material-ui/core/InputAdornment";
@@ -132,6 +136,7 @@ const Contacts = () => {
 
     const [importContactModalOpen, setImportContactModalOpen] = useState(false);
     const [deletingContact, setDeletingContact] = useState(null);
+    const [deletingInBulkContact, setDeletingInBulkContact] = useState(null);
     const [ImportContacts, setImportContacts] = useState(null);
     const [blockingContact, setBlockingContact] = useState(null);
     const [unBlockingContact, setUnBlockingContact] = useState(null);
@@ -144,11 +149,48 @@ const Contacts = () => {
     const fileUploadRef = useRef(null);
     const [selectedTags, setSelectedTags] = useState([]);
     const { setCurrentTicket } = useContext(TicketsContext);
+    const [selectedContacts, setSelectedContacts] = useState('');
 
 
     const { getAll: getAllSettings } = useCompanySettings();
     const [hideNum, setHideNum] = useState(false);
     const [enableLGPD, setEnableLGPD] = useState(false);
+    // roundedOutlinedButton 
+    // const roundedOutlinedButton = {
+    //     backgroundColor: '#fff',
+    //     borderRadius: '12px',
+    //     textTransform: 'none',
+    //     fontWeight: 600,
+    //     paddingX: 2,
+    //     paddingY: 1,
+    //     boxShadow: 1,
+    //     color: '#333',
+    //     borderColor: '#ddd',
+    //     '&:hover': {
+    //       backgroundColor: '#f5f5f5',
+    //       boxShadow: 2,
+    //       borderColor: '#ccc',
+    //     },
+    //   };
+      const roundedOutlinedButton = {
+        backgroundColor: '#fff',
+        borderRadius: '12px',
+        textTransform: 'none',
+        fontWeight: 600,
+        paddingX: 2,
+        paddingY: 1,
+        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.08)',
+        color: '#333',
+        border: '1px solid #ddd',
+        transition: 'all 0.2s ease-in-out',
+        '&:hover': {
+          backgroundColor: '#fefefe',
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+          borderColor: '#ccc',
+        },
+      };
+      
+
     useEffect(() => {
 
         async function fetchData() {
@@ -244,6 +286,15 @@ const Contacts = () => {
         }
     };
 
+    const handleToggleContact = (id) => {
+        setSelectedContacts((prev) =>
+          prev.includes(id)
+            ? prev.filter((item) => item !== id)
+            : [...prev, id]
+        );
+      };
+      
+
     const handleSelectedTags = (selecteds) => {
         const tags = selecteds.map((t) => t.id);
         setSelectedTags(tags);
@@ -315,6 +366,21 @@ const Contacts = () => {
             toastError(err);
             setImportContacts(false);
         }
+    };
+
+    const handleDeleteInBulck = async () => {
+        console.log('selectedContacts', selectedContacts);
+        try {
+            await api.delete("/contactsRemoveMany", { data: { listContactIds: selectedContacts }});
+            toast.success("Contatos deletados com sucesso");
+            window.location.reload();
+            // setSearchParam("");
+            // setPageNumber(1);
+            // setDeletingContact(null);
+        } catch (err) {
+            toastError(err);
+        }
+        setDeletingInBulkContact(null);
     };
 
     const handleimportChats = async () => {
@@ -436,25 +502,52 @@ const Contacts = () => {
                         type="search"
                         value={searchParam}
                         onChange={handleSearch}
+                        variant="outlined"
+                        size="small"
+                        sx={{
+                            backgroundColor: '#fff',
+                            borderRadius: '12px',
+                            boxShadow: 1,
+                            '& .MuiOutlinedInput-root': {
+                            borderRadius: '12px',
+                            paddingLeft: 1,
+                            },
+                            '& .MuiInputBase-input': {
+                            padding: '8px 10px',
+                            },
+                        }}
                         InputProps={{
                             startAdornment: (
-                                <InputAdornment position="start">
-                                    <SearchIcon color="secondary" />
-                                </InputAdornment>
+                            <InputAdornment position="start">
+                                <SearchIcon sx={{ color: '#999', fontSize: 20 }} />
+                            </InputAdornment>
                             ),
                         }}
                     />
+
                     <PopupState variant="popover" popupId="demo-popup-menu">
                         {(popupState) => (
                             <React.Fragment>
                                 <Button
-                                    variant="contained"
-                                    color="primary"
+                                    variant="outlined"
+                                    // color="primary"
+                                    sx={roundedOutlinedButton}
                                     {...bindTrigger(popupState)}
                                 >
                                     Importar / Exportar
                                     <ArrowDropDown />
                                 </Button>
+                                <Button
+                                    variant="outlined"
+                                    startIcon={<DeleteIcon />}
+                                    onClick={() => handleDeleteInBulck(selectedContacts)}
+                                    sx={roundedOutlinedButton}
+                                    >
+                                    Excluir em massa
+                                    </Button>
+
+
+
                                 <Menu {...bindMenu(popupState)}>
                                     <MenuItem
                                         onClick={() => {
@@ -520,9 +613,11 @@ const Contacts = () => {
                         )}
                     </PopupState>
                     <Button
-                        variant="contained"
-                        color="primary"
+                        variant="outlined"
+                        // color="primary"
+                        sx={roundedOutlinedButton}
                         onClick={handleOpenContactModal}
+                        startIcon={<PersonAddAlt1Icon />}
                     >
                         {i18n.t("contacts.buttons.add")}
                     </Button>
@@ -632,6 +727,36 @@ const Contacts = () => {
                                             {contact.channel === "instagram" && (<Instagram style={{ color: "purple" }} />)}
                                             {contact.channel === "facebook" && (<Facebook style={{ color: "blue" }} />)}
                                         </IconButton>
+
+                                            <Checkbox
+                                            checked={selectedContacts.includes(contact.id)}
+                                            onChange={() => handleToggleContact(contact.id)}
+                                            icon={
+                                                <Box
+                                                sx={{
+                                                    width: 20,
+                                                    height: 20,
+                                                    borderRadius: '50%',
+                                                    border: '2px solid #ccc',
+                                                    backgroundColor: 'transparent',
+                                                }}
+                                                />
+                                            }
+                                            checkedIcon={
+                                                <Box
+                                                sx={{
+                                                    width: 20,
+                                                    height: 20,
+                                                    borderRadius: '50%',
+                                                    backgroundColor: '#1976d2',
+                                                    border: '2px solid #1976d2',
+                                                }}
+                                                />
+                                            }
+                                            sx={{
+                                                padding: 0,
+                                            }}
+                                            />
 
                                         <IconButton
                                             size="small"
