@@ -10,6 +10,9 @@ import { toast } from "react-toastify";
 import { useHistory } from "react-router-dom";
 import Checkbox from '@mui/material/Checkbox';
 import Box from '@mui/material/Box';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import FormGroup from '@material-ui/core/FormGroup';
+
 
 import { makeStyles } from "@material-ui/core/styles";
 import Table from "@material-ui/core/Table";
@@ -150,6 +153,7 @@ const Contacts = () => {
     const [selectedTags, setSelectedTags] = useState([]);
     const { setCurrentTicket } = useContext(TicketsContext);
     const [selectedContacts, setSelectedContacts] = useState('');
+    const [selectedAllContacts, setSelectedAllContacts] = useState('');
 
 
     const { getAll: getAllSettings } = useCompanySettings();
@@ -285,6 +289,15 @@ const Contacts = () => {
             history.push(`/tickets/${ticket.uuid}`);
         }
     };
+    const handleSelectAll = (event) => {
+        setSelectedAllContacts(event.target.checked);
+    
+        if (event.target.checked) {
+          setSelectedContacts(contacts.map((contact) => contact.id));
+        } else {
+          setSelectedContacts([]);
+        }
+      };
 
     const handleToggleContact = (id) => {
         setSelectedContacts((prev) =>
@@ -370,13 +383,21 @@ const Contacts = () => {
 
     const handleDeleteInBulck = async () => {
         console.log('selectedContacts', selectedContacts);
+
+        let contactsDeleteList;
+        if(selectedAllContacts){
+            contactsDeleteList = contacts.map((contact) => contact.id);
+        } else {
+            contactsDeleteList = selectedContacts;
+        }
+        console.log('contactsDeleteList', contactsDeleteList);
+
         try {
-            await api.delete("/contactsRemoveMany", { data: { listContactIds: selectedContacts }});
+            await api.delete("/contactsRemoveMany", { data: { listContactIds: contactsDeleteList }});
             toast.success("Contatos deletados com sucesso");
-            window.location.reload();
-            // setSearchParam("");
-            // setPageNumber(1);
-            // setDeletingContact(null);
+            dispatch('')
+            setSelectedContacts([]);
+            setSelectedAllContacts(false);
         } catch (err) {
             toastError(err);
         }
@@ -654,7 +675,13 @@ const Contacts = () => {
                 <Table size="small">
                     <TableHead>
                         <TableRow>
-                            <TableCell padding="checkbox" />
+                             <TableCell>
+                             <FormGroup>
+                                <FormControlLabel
+                                    control={<Checkbox checked={selectedAllContacts} onChange={handleSelectAll} name="selectAll" />}
+                                />
+                                </FormGroup>
+                            </TableCell>
                             <TableCell>
                                 {i18n.t("contacts.table.name")}
                             </TableCell>
@@ -748,8 +775,8 @@ const Contacts = () => {
                                                     width: 20,
                                                     height: 20,
                                                     borderRadius: '50%',
-                                                    backgroundColor: '#1976d2',
-                                                    border: '2px solid #1976d2',
+                                                    backgroundColor: 'rgb(28, 223, 38)',
+                                                    border: '2px solid rgb(28, 223, 38)',
                                                 }}
                                                 />
                                             }
